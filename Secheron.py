@@ -6,18 +6,25 @@ def search_files():
     directory_path = dir_entry.get()
     extension = type_file_dropdown.get()
 
-    result_listbox.delete(0, tk.END)
+    result_treeview.delete(*result_treeview.get_children())
 
     for file_name in os.listdir(directory_path):
         if file_name.endswith(extension):
-            result_listbox.insert(tk.END, file_name)
+            file_path = os.path.join(directory_path, file_name)
+            with open(file_path, 'r') as f:
+                content = f.read()
+                if '<image' in content:
+                    row = (file_name, file_path, 'Image trouvée')
+                else:
+                    row = (file_name, file_path, 'Aucune image trouvée')
+                result_treeview.insert('', tk.END, values=row)
 
 def quit_program():
     root.destroy()
 
 root = tk.Tk()
 root.title("Recherche de fichiers SVG")
-root.geometry("600x400")
+root.geometry("800x400")
 root.configure(bg="black")
 
 tab_control = ttk.Notebook(root)
@@ -55,8 +62,14 @@ result_frame.pack(padx=10, pady=10, expand=1, fill="both")
 result_label = ttk.Label(result_frame, text="Résultats de la recherche :", font=("TkDefaultFont", 10))
 result_label.pack(pady=10)
 
-result_listbox = tk.Listbox(result_frame)
-result_listbox.pack(padx=10, pady=10, expand=1, fill="both")
+result_treeview = ttk.Treeview(result_frame, columns=('Nom de fichier', 'Chemin du fichier', 'Résultat'))
+result_treeview.heading('Nom de fichier', text='Nom de fichier')
+result_treeview.heading('Chemin du fichier', text='Chemin du fichier')
+result_treeview.heading('Résultat', text='Résultat')
+result_treeview.column('Nom de fichier', width=200)
+result_treeview.column('Chemin du fichier', width=400)
+result_treeview.column('Résultat', width=200)
+result_treeview.pack(padx=10, pady=10, expand=1, fill="both")
 
 quit_button = ttk.Button(result_frame, text="Quitter", command=quit_program)
 quit_button.pack(side=tk.BOTTOM, pady=10)
